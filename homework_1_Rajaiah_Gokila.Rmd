@@ -8,23 +8,36 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+My Github repository for my assignments can be found at this URL: [https://github.com/ila7goki/compscix4152](https://github.com/ila7goki/compscix4152)
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r load_package, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(mdsr)
 ```
 
-## Including Plots
+```{r warning=FALSE, message=FALSE}
+data('WorldCities')
 
-You can also embed plots, for example:
+# About WorldCities Dataset:
+'There are 23018 observations and 10 variables in the WorldCities dataset. Following are the 10 variables: code, name, atitude, longitude, country, countryRegion, population, regionCode, region and date.'
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```
+```{r warning=FALSE, message=FALSE}
+
+glimpse(WorldCities)
+
+WorldCities <- head(WorldCities, 200)
+
+country_col <- WorldCities$country
+
+unique(country_col)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r warning=FALSE, message=FALSE}
+'Following are unique Regions that are observed in the dataset:
+'
+region_col <- WorldCities$region
+
+unique(region_col)
+
+```
