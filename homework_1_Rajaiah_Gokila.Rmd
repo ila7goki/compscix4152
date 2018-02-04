@@ -36,8 +36,25 @@ unique(country_col)
 ```{r warning=FALSE, message=FALSE}
 'Following are unique Regions that are observed in the dataset:
 '
-region_col <- WorldCities$region
+WorldCities %>% select(region) %>% unique()
 
-unique(region_col)
+```
+
+
+```{r Warning=FALSE, message=FALSE}
+'Observed Countries are:'
+
+WorldCities %>% select(country) %>% unique()
+```
+
+```{r}
+'Population Histogram:'
+
+WorldCities %>% ggplot(aes(x=population)) + geom_histogram(bins=25) + xlab('City Population')
+```
+
+```{r}
+WorldCities %>% ggplot(aes(x=population)) + geom_histogram() + scale_x_continuous(labels = scales::comma) + xlab('City Population') + ylab('Count') + ggtitle('Histogram Plot of Population') + theme_bw()
+
 
 ```
