@@ -15,13 +15,17 @@ library(tidyverse)
 library(mdsr)
 ```
 
+
+## About WorldCities Dataset:
+
+
+There are 23018 observations and 10 variables in the WorldCities dataset. Following are the 10 variables: code, name, atitude, longitude, country, countryRegion, population, regionCode, region and date.
+
 ```{r warning=FALSE, message=FALSE}
 data('WorldCities')
 
-# About WorldCities Dataset:
-'There are 23018 observations and 10 variables in the WorldCities dataset. Following are the 10 variables: code, name, atitude, longitude, country, countryRegion, population, regionCode, region and date.'
-
 ```
+
 ```{r warning=FALSE, message=FALSE}
 
 glimpse(WorldCities)
@@ -31,30 +35,38 @@ WorldCities <- head(WorldCities, 200)
 country_col <- WorldCities$country
 
 unique(country_col)
+
 ```
+
+# Unique Regions
 
 ```{r warning=FALSE, message=FALSE}
-'Following are unique Regions that are observed in the dataset:
-'
+
 WorldCities %>% select(region) %>% unique()
+
 
 ```
 
 
-```{r Warning=FALSE, message=FALSE}
-'Observed Countries are:'
+# Unique Countries
+
+```{r Warning=FALSE, message=FALSE, tidy=TRUE}
 
 WorldCities %>% select(country) %>% unique()
 ```
 
-```{r}
-'Population Histogram:'
+# Population Histogram 1
+
+```{r message=FALSE, warning=FALSE}
 
 WorldCities %>% ggplot(aes(x=population)) + geom_histogram(bins=25) + xlab('City Population')
+
 ```
 
-```{r}
-WorldCities %>% ggplot(aes(x=population)) + geom_histogram() + scale_x_continuous(labels = scales::comma) + xlab('City Population') + ylab('Count') + ggtitle('Histogram Plot of Population') + theme_bw()
+#Population Histogram 2
 
+```{r message=FALSE, warning=FALSE}
+
+WorldCities %>% ggplot(aes(x=population)) + geom_histogram() + scale_x_continuous(labels = scales::comma) + xlab('City Population') + ylab('Count') + ggtitle('Histogram Plot of Population') + theme_bw()
 
 ```
