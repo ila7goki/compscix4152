@@ -143,3 +143,17 @@ ggplot(data=mpg) + geom_point(mapping = aes(x=trans, y=hwy, color= displ<5))
 ggplot(data=mpg) + geom_point(mapping = aes(x=trans, y=hwy, color= 'hello'))
 
 ```
+## Facets:
+
+1. nRow & nCol are arguments that can be used to pass the number of rows and columns to use to display the plots in the Facet.  
+   dir is other option that controls the layout of individual panels. This option sets the direction of panel. 
+   In Facet_grid uses the number of rows & cols are controlled by the number of distinct values in the variables used to plot the grid. 
+
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 4, ncol=2)
+```
+
+2. When plotting a facet_grid, if the number of rows & cols are different then the variable with more distinct values should be used as columns and the variable with least distinct values as rows. Scrolling down through the screen to look at plots is not the best way, as the screens are always wider. 
