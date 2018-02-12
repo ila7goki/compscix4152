@@ -1,0 +1,145 @@
+---
+title: "COMPSCIX 415.2 Homework 1"
+author: "Gokila Rajaiah"
+date: "February 6, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(tidyverse)
+```
+
+## ggplot Intro (3.2.4):
+
+1. Running ggplot by passing the dataset, will create a blank canvas like below inside which the graph can be plotted by adding layers such as Geom Function etc...
+
+```{r}
+ggplot(data = mpg)
+
+```
+
+2. There are 234 rows and 11 columns in the "mpg" dataset.
+
+```{r}
+
+glimpse(mpg)
+
+```
+
+
+3. "drv" variable tells information about Automobile layout on the vehicle engine and drive wheels. Different categories of them are F - Front Wheel Drive (FWD), R - Rear Wheel Drive (RWD) & 4 = 4 Wheel Drive (4WD)
+
+
+
+4. Scatter Plot of Highway Miles Per Gallon vs Number of Cylinders:
+
+    This plot shows that there's a negative relationship between the number of cylinders in the engine and the fuel efficiency. i.e the higher the number of cylinders the lower the highway miles per gallon.
+
+```{r}
+
+ggplot(data = mpg) + geom_point(mapping = aes(x=cyl, y=hwy))
+
+```
+5. Scatterplot of class vs drv:
+
+    This plot doesn't give any useful relationship between the two variables class & drv as both are characteristic properties of the car and each class type comes in all the 3 different drive layouts.  
+
+```{r}
+
+ggplot(data = mpg) + geom_point(mapping = aes(x=drv, y=class))
+
+```
+
+## Aesthetic Mappings (3.3.1):
+
+
+1. Aesthetic is the visual property of the objects in the plot. It can be applied either by mapping the aesthetic property to a variable or by manually setting the aesthetic by name as an argument of geom function. 
+
+  In the below code aesthetic property doesn't show any effect in the plot is because, when using the aesthetic property mapping the aethetic property color should be set to a variable of the data set. Since there's no variable called "blue" in the dataset no effect is seen in the plot. 
+
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+
+```
+
+  In order to the set the point' color to be blue, use the manual setting method of passing the color = "blue" as an arugument to geom_function like below:
+  
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+
+```
+
+2. Manufacturer, Model, trans, drv, fl and class are categorical variables. displ, cyl, trans, cty, hwy are continuous variables. 
+
+  Running "mpg" shows the data frame with the headers & the types. From the type of the header we can identify if the variable is categorical or continuous. 
+
+
+```{r}
+mpg
+
+```
+
+3. Mapping a continuous variable to Color property will display the variations of values using different saturations of blue, whereas mapping a categorical variable to Color will display distinct values of the property in different colors.
+
+
+```{r}
+ggplot(data=mpg) + geom_point(mapping = aes(x=displ, y=cty, color=hwy))
+
+```
+        
+   Mapping a continuous variable to size property will map the value to area of the mark. Any ordered continuous variable is suitable to show the variation using size property. 
+      
+
+```{r}
+
+ggplot(data=mpg) + geom_point(mapping = aes(x=displ, y=cty, size=cty))
+
+```
+
+
+  Shapes cannot be mapped using a continous variable as they cannot be ordered. 
+      
+```{r}
+
+ggplot(data=mpg) + geom_point(mapping = aes(x=displ, y=hwy, shape=drv))
+
+```
+
+4. Mapping same variable to multiple aesthetics will work just fine. This will give more visual cues to differentiate things from having a very slight variation between different values (ex: when color uses two or more colors of same with a sligh variation in the saturation.)
+
+
+```{r}
+
+ggplot(data=mpg) + geom_point(mapping = aes(x=displ, y=cty, shape=drv, color=drv))
+
+ggplot(data=mpg) + geom_point(mapping = aes(x=displ, y=cty, size=cty, color=cty))
+
+```
+5. Stroke aesthetic modifies the width of the border of shape according to the value provided. This can be used with all those shapes with a border, which are the following: 21, 22, 23, 24. Using stroke with shape, colour & fill property you can colour the inside and outside of the shape with different colours. 
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y=cty), shape=23, colour = "blue", fill = "white", size = 5, stroke = 2)
+
+```
+
+6. Mapping an aesthetic to an expression will evaluate the expression and uses the result as data to plot. Below is an example where displ < 5 will get evalated to a boolean value and is plotted. 
+
+  Mapping an aesthetic to anything else other than the variable column of property values will just plot the graph by default color without considering the value. I suppose doing this should technically throw an error. 
+
+```{r}
+ggplot(data=mpg) + geom_point(mapping = aes(x=trans, y=hwy, color= displ<5))
+ggplot(data=mpg) + geom_point(mapping = aes(x=trans, y=hwy, color= 'hello'))
+
+```
