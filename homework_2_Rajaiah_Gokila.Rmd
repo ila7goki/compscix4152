@@ -235,3 +235,16 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
 ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +  geom_point(size = 4, colour = "white") + geom_point(aes(colour = drv))
 
 ```
+
+## Bar Charts:
+
+There are two types of bar charts. First one is geom_bar which uses the frequency or other aggregation that is provided to mark the height of the bar of each group. Second one is geom_col which uses the exact value in the input data for each group to mark bar height. In other words geom_col uses stat_identity. We can also create geom_col type chart using geom_bar by providing [stat = "identity"] as an argument to aes of geom_bar layer. 
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+
+ggplot(data = diamonds) + 
+  geom_col(mapping = aes(x = cut, y=count(1)))
+
+```
