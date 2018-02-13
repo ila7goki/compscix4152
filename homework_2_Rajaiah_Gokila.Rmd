@@ -125,7 +125,7 @@ ggplot(data=mpg) +
 
 ```
 
-4. Mapping same variable to multiple aesthetics will work just fine. This will give more visual cues to differentiate things from having a very slight variation between different values (ex: when color uses two or more colors of same with a sligh variation in the saturation.)
+4. Mapping same variable to multiple aesthetics will work just fine. This will give more visual cues to differentiate things from having a very slight variation between different values (ex: when color uses two or more colors of same with a slight variation in the saturation.)
 
 
 ```{r, fig.cap="Using multiple aesthetics to same variable", fig.align='center'}
@@ -137,7 +137,7 @@ ggplot(data=mpg) +
   geom_point(mapping = aes(x=displ, y=cty, size=cty, color=cty))
 
 ```
-5. Stroke aesthetic modifies the width of the border of shape according to the value provided. This can be used with all those shapes with a border, which are the following: 21, 22, 23, 24. Using stroke with shape, colour & fill property you can colour the inside and outside of the shape with different colours. 
+5. Stroke aesthetic modifies the width of the border of shape according to the value provided. This can be used with all those shapes with a border, which are the following: 21, 22, 23, 24. Using stroke with shape, colour & fill property we can colour the inside and outside of the shape with different colours. 
 
 ```{r fig.cap="Using stroke property to geom_points", fig.align='center'}
 
@@ -166,7 +166,7 @@ ggplot(data=mpg) +
 1. nRow & nCol are arguments that can be used to pass the number of rows and columns to use to display the plots in the Facet.  
    * dir is other option that controls the layout of individual panels. This option sets the direction of panel. 
    
-   * In Facet_grid uses the number of rows & cols are controlled by the number of distinct values in the variables used to plot the grid. 
+   * In Facet_grid, the number of rows & cols are controlled by the number of distinct values in the variables used to plot the grid. 
 
 
 ```{r, fig.cap="ncol & nrow usage in Facet_Wrap", fig.align='center'}
@@ -177,7 +177,7 @@ ggplot(data = mpg) +
 
 ```
 
-2. When plotting a facet_grid, if the number of rows & cols are different then the variable with more distinct values should be used as columns and the variable with least distinct values as rows. Scrolling down through the screen to look at plots is not the best way, as the screens are always wider. 
+2. When plotting a facet_grid, if the number of rows & cols are different, then the variable with more distinct values should be used as columns and the variable with least distinct values as rows. Scrolling down through the screen to look at plots is not the best way, as the screens are always wider. 
 
 
 ## Geometric Objects
@@ -188,12 +188,20 @@ ggplot(data = mpg) +
   c. geom_histogram - Histograms
   d. geom_area - Area charts
   
-```{r, fig.cap="Line chart using geom_line (displ vs hwy)", fig.align='center'}
 
-  ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
-    geom_line()
+
+```{r, fig.cap="Line chart using geom_line (displ vs hwy)", fig.align='center', message=FALSE, error=FALSE, warning=FALSE}
+
+# creating a dataframe using mpg to include aggregation of hwy by displ. 
+dat <- aggregate(mpg, by = list(mpg$displ), mean)
+dat <- dat[c(4, 10)]
+
+# using the created dataframe to plot line chart. 
+ggplot(data = dat, mapping = aes(x = displ, y = hwy)) +
+    geom_line() 
   
 ```
+
 2. This plot shows the relationship between engine displacement and highway miles for different drv variables. Looking at it shows that 4 wheel drive cars are the ones that provides low mileage and front wheel drive cars gives high mileage performance. 
 
 ```{r}
@@ -204,9 +212,9 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
 
 ```
 
-3. Show.legend includes the legend associated with that geom' layer. By default if there's any aesthetics are mapped for a geom layer, legend is included. In the above chart legend is included showing the mark for both point & line.
+3. Show.legend includes the legend associated with that geom' layer. By default if there's any aesthetics that are mapped for a geom layer, legend is included. In the above chart legend is included showing the mark for both point & line.
 If show.legend is set to False it will not display the legend associated with that particular layer' aestheic mapping.
-Example below shows both geom layer' legend is set to False. 
+Example below shows that both geom layer' legend is set to False. 
 
 ```{r, fig.cap="Using show.legend", fig.align='center', warning=FALSE}
 
@@ -270,7 +278,7 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
 
 There are two types of bar charts. First one is geom_bar which uses the frequency or other aggregation that is provided to mark the height of the bar of each group. Second one is geom_col which uses the exact value in the input data for each group to mark bar height. In other words geom_col uses stat_identity. We can also create geom_col type chart using geom_bar by providing [stat = "identity"] as an argument to aes of geom_bar layer. 
 
-```{r, fig.cap="geom_bar vs geom_col", fig.align='center'}
+```{r, fig.cap="geom_bar & geom_col to show same graph", fig.align='center'}
 
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut))
