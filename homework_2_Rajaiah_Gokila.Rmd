@@ -163,7 +163,24 @@ ggplot(data=mpg) +
 
 ## Facets:
 
-1. nRow & nCol are arguments that can be used to pass the number of rows and columns to use to display the plots in the Facet.  
+1. Advantages of using Facets:
+  * Faceting gives a separate view of charts, which is a better visualization when there are more than 2 variables involved. Looking at the charts separated by each group, we can identify trends quickly within each group. This cannot be done quickly with colour aesthetics when the colour choosen for each group are similar or when there are more distinct types in a variable that is used for grouping. 
+  
+  Disadvantages of using Facets:
+  * It is hard to compare & identify trends across various groups at a glance, especially when grids doesn't follow an order. Also, looks overwhelming at a first look to audience when this is type of chart is used in presenting something. 
+  
+  For a larger dataset Faceting is a better choice, as there can be overlapping of points with using Color Aesthetic grouping in the same chart, which cannot help in identifying trends with ecah group.
+
+  
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+
+```
+
+2. nRow & nCol are arguments that can be used to pass the number of rows and columns to use to display the plots in the Facet.  
    * dir is other option that controls the layout of individual panels. This option sets the direction of panel. 
    
    * In Facet_grid, the number of rows & cols are controlled by the number of distinct values in the variables used to plot the grid. 
@@ -177,7 +194,7 @@ ggplot(data = mpg) +
 
 ```
 
-2. When plotting a facet_grid, if the number of rows & cols are different, then the variable with more distinct values should be used as columns and the variable with least distinct values as rows. Scrolling down through the screen to look at plots is not the best way, as the screens are always wider. 
+3. When plotting a facet_grid, if the number of rows & cols are different, then the variable with more distinct values should be used as columns and the variable with least distinct values as rows. Scrolling down through the screen to look at plots is not the best way, as the screens are always wider. 
 
 
 ## Geometric Objects
@@ -278,7 +295,7 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
 
 There are two types of bar charts. First one is geom_bar which uses the frequency or other aggregation that is provided to mark the height of the bar of each group. Second one is geom_col which uses the exact value in the input data for each group to mark bar height. In other words geom_col uses stat_identity. We can also create geom_col type chart using geom_bar by providing [stat = "identity"] as an argument to aes of geom_bar layer. 
 
-```{r, fig.cap="geom_bar & geom_col to show same graph", fig.align='center'}
+```{r, fig.cap="geom_bar & geom_col to show same", fig.align='center'}
 
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut))
