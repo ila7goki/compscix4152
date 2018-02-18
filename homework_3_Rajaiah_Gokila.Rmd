@@ -92,13 +92,85 @@ ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
   
 ```{r}
 
-library(tidyverse)
 
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy))
 
 filter(mpg, cyl == 8)
 filter(diamonds, carat > 3)
+
+```
+
+
+## Data Transformations - Filters (5.2.4):
+
+1.
+
+
+```{r}
+
+library("nycflights13")
+
+```
+
+```{r}
+
+  (arr_delay_abv_120mins <- filter(flights, arr_delay >= 120))
+
+  (flew_to_houston <- filter(flights, dest == "IAH" | dest == "HOU"))
+
+  (filteredCarriers <- filter(flights, carrier %in% c("UA", "AA", "DL")))
+
+  (departedInSummer <- filter(flights, month %in% c(7, 8, 9)))
+
+  (arrivedTwohrsLate <- filter(flights, arr_delay > 120 && dep_delay <= 0))
+
+  filter(flights, dep_delay >= 60, (dep_delay - arr_delay > 30))
+  
+  (departedBetMidnightAndSiX <- filter(flights, dep_time >= 2400 | dep_time <= 600 ))
+
+
+```
+
+
+2. between() filterting is the shortcut way to use x >= left & x <= right. left & right are boundary values to check for x. 
+
+
+```{r}
+
+filter(flights, between(dep_time, 600, 2400))
+
+```
+
+3. 8255 flights are missing dep_time. dep_delay, arr_time, arr_delay, tailnum, air_time are other variables missing data. Since both dep_time & arr_time is missing these must be cancelled flights. 
+
+```{r}
+
+sum(is.na(flights$dep_time))
+
+map_dbl(flights, ~sum(is.na(.x)))
+
+filter(flights, is.na(dep_time))
+
+```
+
+4. 
+
+a. NA ^ 0 is not NA because anything to power of 0 is 1. 
+b. NA | TRUE is not NA because, if atleast one of the result is TRUE then the expression evaluates to true. In this      second part is TRUE. 
+
+c. FALSE & NA is not NA because atleast one of the two expressions should be tested. In this first one evaluates to FALSE. 
+
+
+General rule is whenever there is logical expressions involved if atleast one can be evaluated to return a TRUE or FALSE then result should not be NA. 
+
+```{r}
+
+NA ^ 0
+
+NA | TRUE
+
+FALSE & NA
 
 
 ```
