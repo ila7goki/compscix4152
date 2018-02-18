@@ -1,0 +1,44 @@
+---
+title: "COMPSCIX 415.2 Homework 3"
+author: "Gokila Rajaiah"
+date: "February 17, 2018"
+output: html_document
+---
+
+
+1. mpg values are rounded when plotting which causes some of the points to overlap which makes it hard to see where most of the data points lies. We can fix this by adding Jitter to the plot which adds some amout of random noise to indicate ovelapping points. Jitters can be added either using Position property of geom_point or as a separate layer of geom_jitter(). 
+
+```{r}
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_jitter()
+
+```
+
+2. Width & Height controls the amount of horizontal & vertical jittering. The jitter is added in both positive & negative directions so the total spread is twice the value passed. Default is 40% of the resolution of the data. 
+
+```{r}
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_jitter(height=50)
+
+```
+
+3. geom_jitter adds random noise to the points to indicate overlapping points. Whereas, geom_count counts the number of obeservations in each point and maps the point area to it. The larger the point is the more number of oversations overlapping. 
+
+```{r fig.cap="geom_count", fig.align='center'}
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_count()
+
+```
+
+4. The default adjustment for geom_boxplot() is position_dodge. 
+
+```{r}
+
+ggplot(data = mpg, mapping = aes(x=class, y=cty, fill=drv)) +
+  geom_boxplot(position='dodge') + 
+  geom_boxplot(position='identity') 
+
+```
