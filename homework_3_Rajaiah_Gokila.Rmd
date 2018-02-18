@@ -5,6 +5,13 @@ date: "February 17, 2018"
 output: html_document
 ---
 
+```{r}
+
+library(tidyverse)
+
+```
+
+## Position Adjustments (3.8.1):
 
 1. mpg values are rounded when plotting which causes some of the points to overlap which makes it hard to see where most of the data points lies. We can fix this by adding Jitter to the plot which adds some amout of random noise to indicate ovelapping points. Jitters can be added either using Position property of geom_point or as a separate layer of geom_jitter(). 
 
@@ -40,5 +47,58 @@ ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
 ggplot(data = mpg, mapping = aes(x=class, y=cty, fill=drv)) +
   geom_boxplot(position='dodge') + 
   geom_boxplot(position='identity') 
+
+```
+
+## Coordinate Systems (3.9.1):
+
+2. labs is used to set the title, subtitle & labels for Axis, Legend & Plot. 
+
+```{r}
+
+p <- ggplot(mtcars, aes(mpg, wt, colour = cyl)) + geom_point()
+p + labs(colour = "Cylinders")
+
+```
+
+
+4. At a first glance this plot shows a linear relationship between city mileage & hwy mileage. 
+
+coord_fixed, by default forces a ratio of 1 between the physical representation of data units on the axes.i.e. One unit on x-axis is the same length as one unit on y-axis. This is used whenever both variables have same unit of length, so that they can be compared directly (like apples to apples comparison), which shows a better relationship view in the plot.
+Here both axis represents the miles per gallon unit and using fixed scale coordinate system we can see that overall cars have better Highway mileage than City Mileage. 
+
+geom_abline, is used to add a reference line to plot defined by slope & intercept parameters. By default it uses slope 1 & intercept 0. 
+
+Adding both geom_abline & coord_fixed layers to the plot we can see that gas efficiency is on average better for Highway driving & worse for City driving.
+
+
+```{r}
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() + 
+  geom_abline() +
+  coord_fixed()
+
+```
+
+## Workflow Basics (4.4):
+
+1. Second line has a typo. my_variable is declared whereas my_varıable is called, which results in that "variable name not defined error". R is case-sensitive. "Typos matter. Case matters".
+
+2.
+  a. "Dota typo" ( We can get "Dota" data but that has to be passed to "data" parameter in ggplot. ;) 
+  b. fliter typo. It has to be filter. 
+  c. No dataset as "diamond". Typo. It is "diamonds".
+  
+```{r}
+
+library(tidyverse)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+filter(mpg, cyl == 8)
+filter(diamonds, carat > 3)
+
 
 ```
