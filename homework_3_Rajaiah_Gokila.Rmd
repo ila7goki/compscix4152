@@ -172,5 +172,55 @@ NA | TRUE
 
 FALSE & NA
 
+```
+
+
+## Data Transformations - Select (5.4.1):
+
+1.
+
+```{r}
+
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+
+select(flights, starts_with("dep"), starts_with("arr"))
+
+select(flights, dep_time, arr_time, ends_with("delay"))
+
+vars <- c("dep_time", "dep_delay", "arr_time", "arr_delay")
+select(flights, one_of(vars))
+
+select(flights, matches("^dep|^arr"))
+
+```
+
+2. Including same variable  multiple times will still only include the variable once in the data frame that is returned. 
+
+
+```{r}
+
+select(flights, dep_time, dep_time, dep_time)
+
+```
+
+3. one_of() selects all variables which matches the variable given in the vectors that is passed. 
+
+```{r}
+
+vars <- c("dep_time", "dep_delay", "arr_time", "arr_delay")
+select(flights, one_of(vars))
+
+```
+
+4. Yes. R is case-sensitive. Seeing the select returnig results for contains("TIME") with all those variables which contains "time" doesn't make sense. But, by default each select_helper function ignore the cases of the variables.
+
+To change the default use ignore.case parameter to contains function and set it to False so that cases are taken into account when selecting. 
+
+
+```{r}
+
+select(flights, contains("TIME"))
+
+select(flights, contains("TIME", ignore.case=F))
 
 ```
