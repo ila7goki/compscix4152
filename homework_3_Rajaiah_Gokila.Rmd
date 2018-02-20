@@ -5,7 +5,7 @@ date: "February 17, 2018"
 output: html_document
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 library(tidyverse)
 
@@ -31,23 +31,28 @@ ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
 
 ```
 
-3. geom_jitter adds random noise to the points to indicate overlapping points. Whereas, geom_count counts the number of obeservations in each point and maps the point area to it. The larger the point is the more number of oversations overlapping. 
+3. geom_jitter adds random noise to the points to indicate overlapping points. Whereas, geom_count counts the number of obeservations in each point and maps the point area to it. The larger the point is the more number of obersations overlapping. 
 
-```{r fig.cap="geom_count", fig.align='center'}
+```{r fig.cap="Cty vs Hwy using geom_count", fig.align='center'}
 
 ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
   geom_count()
 
 ```
 
-4. The default adjustment for geom_boxplot() is position_dodge. 
+4. The default adjustment for geom_boxplot() is position = dodge. 
 
 ```{r}
 
 ggplot(data = mpg, mapping = aes(x=class, y=cty, fill=drv)) +
-  geom_boxplot(position='dodge') + 
-  geom_boxplot(position='identity') 
+  geom_boxplot() + 
+  labs(title = 'Default position adjustment for box plot')
+ 
+  #geom_boxplot(position='identity') 
 
+ggplot(data = mpg, mapping = aes(x=class, y=cty, fill=drv)) +
+  geom_boxplot(position='dodge') + 
+  labs(title = 'Dodge position adjustment for box plot')
 ```
 
 ## Coordinate Systems (3.9.1):
@@ -113,6 +118,8 @@ library("nycflights13")
 
 ```
 
+
+Note: Had to search online to clearly understand question no.6 in this section.
 ```{r}
 
   (arr_delay_abv_120mins <- filter(flights, arr_delay >= 120))
@@ -144,6 +151,8 @@ filter(flights, between(dep_time, 600, 2400))
 
 3. 8255 flights are missing dep_time. dep_delay, arr_time, arr_delay, tailnum, air_time are other variables missing data. Since both dep_time & arr_time is missing these must be cancelled flights. 
 
+Note: Got help from online to find all the variables with missing values. 
+
 ```{r}
 
 sum(is.na(flights$dep_time))
@@ -159,7 +168,7 @@ filter(flights, is.na(dep_time))
 a. NA ^ 0 is not NA because anything to power of 0 is 1. 
 b. NA | TRUE is not NA because, if atleast one of the result is TRUE then the expression evaluates to true. In this      second part is TRUE. 
 
-c. FALSE & NA is not NA because atleast one of the two expressions should be tested. In this first one evaluates to FALSE. 
+c. FALSE & NA is not NA because atleast one of the two expressions should be evaluated. In this first one evaluates to FALSE. 
 
 
 General rule is whenever there is logical expressions involved if atleast one can be evaluated to return a TRUE or FALSE then result should not be NA. 
@@ -203,7 +212,7 @@ select(flights, dep_time, dep_time, dep_time)
 
 ```
 
-3. one_of() selects all variables which matches the variable given in the vectors that is passed. 
+3. one_of() selects all variables which matches the variables given in the vectors that is passed. 
 
 ```{r}
 
