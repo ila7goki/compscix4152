@@ -1,0 +1,366 @@
+---
+title: "COMPSCIX 415.2 Homework 4"
+author: "Gokila Rajaiah"
+date: "February 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+
+## Grouped Summaries (5.6.7):
+
+
+#### Creating not_Cancelled_flights from flight data frame:
+
+```{r}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+```
+#### 2 (a)
+
+```{r}
+
+not_cancelled %>% count(dest) 
+
+not_cancelled %>% group_by(dest) %>% summarise(n = n())
+
+```
+#### 2 (b)
+
+```{r}
+
+not_cancelled %>% count(tailnum, wt = distance)
+
+not_cancelled %>% group_by(tailnum) %>% summarise(n = sum(distance, na.rm = TRUE))
+
+```
+
+#### 4. 
+
+Minimum number of cancelled flights in a day = 634
+Maximum number of cancelled flights in a day = 1014
+
+Considering arr_delay variable for this comparison, plotted the scatter plot of average_arr_delay vs avg_cancelled_flights.
+
+From the plot we can see that as the delay increases the proportion of cancelled flights vary a lot. Also, less flights were observed to have large delays ie. above 60 mins. From this, it looks like the proportion of cancelled flights is constant and not really related to the average delay. 
+
+
+```{r}
+
+cancelled_flight_summary <- flights %>% 
+  mutate(cancelled = is.na(dep_delay), is.na(arr_delay)) %>% 
+  group_by(year, month, day) %>% 
+  summarise(total_cancelled_flights = n(),
+            avg_cancelled_flights = mean(cancelled),
+            avg_arr_delay = mean(arr_delay, na.rm=TRUE)
+  ) 
+
+cancelled_flight_summary %>% 
+  group_by() %>% 
+  summarise(min_cancelled_in_a_day = min(total_cancelled_flights),
+            max_cancelled_in_a_day = max(total_cancelled_flights)
+            )
+
+ggplot(data = cancelled_flight_summary) +
+  geom_point(mapping = aes(x=avg_arr_delay, y=avg_cancelled_flights), color = "blue") 
+
+
+```
+
+#### 5 (a).
+
+Frontier Airlines seems to have the worst delays. Their Avg arr_delay is highest among all. 
+(Note: Used the following [link](https://www.airfarewatchdog.com/pages/3799702/airline-letter-codes/) to find airline name from code)
+
+```{r}
+
+not_cancelled %>% 
+  group_by(carrier) %>%
+  summarise(mean_delay = mean(arr_delay)) %>%
+  arrange(desc(mean_delay))
+
+```
+
+#### 5 (b).
+
+Looking at the Average arrival delay by carrier and taking the top 2 carriers that has higher avg_delay we can see that top 1 goes to 5 destination airports whereas the second top one goes to only one destination airport (DEN). Looking at the avg delay by dest for DEN, it looks like the avg delay is not so high (12) compared to the dest airport with highest avg delay of 33.6. This gives us an impression that the major cause of the delay is bad carrier. 
+
+Now on the other hand looking at Avg_delay by destination airport overall and picking the one 'JAC' which has two carriers flying in (DL & UA). Both carriers have very low average delays in general (DL = -2.7, UA = 5.16). But they have higher average delay when the destination airport is JAC, which makes us think that bad airport is the cause for this high avg delay.
+
+From the above two scenarios it is hard to come to a conclusion of whether the delay is caused by bad carrier or bad airport. More or like both bad airports & bad carrier is a combination factor that causes arrival delays. 
+
+
+```{r}
+
+flights %>% summarise(total_carriers = n_distinct(carrier),
+                      total_dest_airports = n_distinct(dest),
+                      total_origin_airports = n_distinct(origin))
+
+```
+
+
+```{r}
+
+avg_delay_by_flights_n_dest <- flights %>% 
+  group_by(carrier, dest) %>% 
+  summarise(avg_delay = mean(arr_delay, na.rm = TRUE)) #%>%
+  #filter(avg_delay > 0)
+
+
+avg_delay_by_flights_n_dest
+
+avg_delay_by_carrier <- avg_delay_by_flights_n_dest %>% 
+  group_by(carrier) %>% 
+  summarise(num_dest_airports = n(),
+            mean_delay = mean(avg_delay)) %>%
+  arrange(desc(mean_delay))
+
+avg_delay_by_carrier
+
+avg_delay_by_dest <- avg_delay_by_flights_n_dest %>%
+  group_by(dest) %>%
+  summarise(num_carriers = n(),
+            avg_delay = mean(avg_delay)) %>%
+  arrange(desc(avg_delay))
+
+avg_delay_by_dest 
+
+avg_delay_by_flights_n_dest %>% filter(dest == 'JAC' )
+
+avg_delay_by_dest %>% filter(dest == 'JAC')
+avg_delay_by_carrier %>% filter(carrier %in% c('UA', 'DL'))
+
+
+```
+#### 6.
+
+Sort argument to count() arranges the counts of the variable in descending order. This can be used when someone wants to look at the top counts in decreasing order, instead of adding one more pipe using arrange().
+
+```{r}
+
+not_cancelled %>% count(dest,sort=T)
+
+```
+
+##Tibbles (10.5):
+
+#### 1.
+
+There are a couple of different ways to identify a tibble. 
+a. When a tibble is printed the following is printed on top in console: 
+   "A tibble: rows X cols"
+   Also, below each column name data type of the column is printed.
+b. A tibble only prints top 10 rows whereas a data frame prints the entire data frame. 
+c. class() can be used to find out if an object is a tibble (tbl_df, tbl) or a data frame (data.frame)
+
+#### 2.
+
+1. Dataframes do partial matching of column names. i.e df$x matches x with column name "xyz" and returns that column.
+Whereas when called on a tibble it doesn't recognize as there's no column as "x" and returns error/NULL. 
+
+```{r error=FALSE, warning=FALSE}
+df <- data.frame(abc = 1, xyz = "a")
+df$x
+
+tbl <- as_tibble(df)
+tbl$x
+
+```
+
+2. When subsetting data on a dataframe, results are not always returned as data frame. Whereas, when subsetting a tibble it always returns a tibble. 
+
+```{r}
+
+df[, "xyz"]
+tbl[, "xyz"]
+
+```
+
+#### 3. We can extract the reference variable from a tibble by passing the variable name in [] tibble. See example below.
+
+```{r}
+
+tbl <- as.tibble(mtcars)
+
+var <- "mpg"
+
+tbl[[var]]
+
+```
+
+#### 6. 
+
+Using the print function and passing n_extra argument' value, we can control the number of columns printed. 
+
+
+```{r}
+
+
+tbl <- as_tibble(mtcars) 
+
+print(tbl, n_extra = 7)
+
+
+```
+
+## Spreading & Gathering (12.3.3):
+
+#### 2. 
+
+Below doesn't work because in the original table4a dataset 1999 & 2000 are column names are non-syntactic (Doesn't start with a letter). So those must be enclosed in single quotes / backticks. If not enclosed the function will look for 1999 & 2000 column in the data frame which is why the error says "Position must be between 0 and n".
+
+```{r, error=FALSE}
+table4a 
+
+
+table4a %>% 
+  gather(1999, 2000, key = "year", value = "cases")
+
+#Fixed
+table4a %>% 
+  gather('1999', '2000', key = "year", value = "cases")
+
+
+```
+
+#### 3. 
+
+Spreading fails here because of a duplicate row. Can add another column to represent the observation number to fix the error in Spreading. 
+
+
+
+```{r, error=FALSE}
+
+people <- tribble(
+  ~name,             ~key,    ~value,
+  #-----------------|--------|------
+  "Phillip Woods",   "age",       45,
+  "Phillip Woods",   "height",   186,
+  "Phillip Woods",   "age",       50,
+  "Jessica Cordero", "age",       37,
+  "Jessica Cordero", "height",   156
+)
+
+#spread(people, key=key, value=value)
+
+## solution 
+
+people1 <- tribble(
+  ~name,             ~key,    ~value, ~observation,
+  #-----------------|--------|------|------
+  "Phillip Woods",   "age",       45, 1,
+  "Phillip Woods",   "height",   186, 1,
+  "Phillip Woods",   "age",       50, 2,
+  "Jessica Cordero", "age",       37, 1,
+  "Jessica Cordero", "height",   156, 1
+)
+
+spread(people1, key, value)
+
+```
+
+
+#### 4.
+
+Gathering works as a better way of tidying below data. Making the male & female columns to be logical as "isFemale" and including a count column as values would tidy this data. 
+
+
+```{r}
+
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes",     NA,    10,
+  "no",      20,    12
+)
+
+
+## Solution
+
+preg %>%
+  gather(male, female, key="isFemale", value="count") %>%
+  mutate(isFemale = isFemale == "female", 
+         isPregnant = pregnant == "yes") %>%
+  select(isFemale, isPregnant, count)
+
+```
+
+## Separating and Uniting (12.4.3):
+
+#### 1. 
+
+Extra argument to separate function tells how to handle the extra values present in a row. There are 3 options to handle this scenario:
+
+a. "warn" - gives warning and drops extra values
+b. "drop" - drops extra values without a warning
+c. "merge" - only splits at most length(into) times. 
+
+
+```{r, error=FALSE, warning=FALSE}
+
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>% 
+  separate(x, c("one", "two", "three"))
+
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>% 
+  separate(x, c("one", "two", "three"), extra = "merge")
+
+```
+
+Fill argument to separate function tells how to handle the missing values in a row. There are 3 options to handle this scneario as well:
+
+a. "warn" - gives a warning and fill from the right.
+b. "right" - fill with missing values on the right.
+c. "left" - fill with missing values on the left.
+
+```{r, error=FALSE, warning=FALSE}
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"))
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"), fill = "right")
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"), fill = "left")
+
+```
+
+
+#### 2.
+
+If Remove argument is set to TRUE it will remove the input column from the output data frame.  This can be set to FALSE when you want to create a new variable but keep the old one as well. 
+
+
+## Import Data File sample:
+
+```{r}
+
+directory = getwd()
+
+file_path <- './Input/baby_names.txt'
+
+baby_names <- read_delim(file_path, delim = '|')
+
+glimpse(baby_names)
+
+
+```
+
+```{r}
+
+saveRDS(baby_names, file = './Output/baby_names.rds')
+
+```
+
+```{r}
+
+baby_names_rds <- readRDS(file = './Output/baby_names.rds')
+
+glimpse(baby_names_rds)
+
+```
+
