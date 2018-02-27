@@ -2,7 +2,11 @@
 title: "COMPSCIX 415.2 Homework 4"
 author: "Gokila Rajaiah"
 date: "February 20, 2018"
-output: html_document
+output:
+  html_document:
+    theme: united
+    highlight: tango
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -54,7 +58,7 @@ Considering arr_delay variable for this comparison, plotted the scatter plot of 
 From the plot we can see that as the delay increases the proportion of cancelled flights vary a lot. Also, less flights were observed to have large delays ie. above 60 mins. From this, it looks like the proportion of cancelled flights is constant and not really related to the average delay. 
 
 
-```{r}
+```{r fig.align='center', fig.cap= "Avg_Arr_delay vs Cancelled Flights"}
 
 cancelled_flight_summary <- flights %>% 
   mutate(cancelled = is.na(dep_delay), is.na(arr_delay)) %>% 
@@ -204,14 +208,12 @@ tbl[[var]]
 
 Using the print function and passing n_extra argument' value, we can control the number of columns printed to console. 
 
-
 ```{r}
 
 
 tbl <- as_tibble(mtcars) 
 
 print(tbl, n_extra = 7)
-
 
 ```
 
