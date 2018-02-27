@@ -128,11 +128,9 @@ $(document).ready(function () {
 
 <div id="grouped-summaries-5.6.7" class="section level2">
 <h2>Grouped Summaries (5.6.7):</h2>
-<div id="creating-not_cancelled_flights-from-flight-data-frame" class="section level4">
-<h4>Creating not_Cancelled_flights from flight data frame:</h4>
+<p>Creating not_Cancelled flights from flight data frame:</p>
 <pre class="r"><code>not_cancelled &lt;- flights %&gt;% 
   filter(!is.na(dep_delay), !is.na(arr_delay))</code></pre>
-</div>
 <div id="a" class="section level4">
 <h4>2 (a)</h4>
 <pre class="r"><code>not_cancelled %&gt;% count(dest) </code></pre>
@@ -150,6 +148,7 @@ $(document).ready(function () {
 ##  9 BGR     358
 ## 10 BHM     269
 ## # ... with 94 more rows</code></pre>
+<p>Alternate way without using count:</p>
 <pre class="r"><code>not_cancelled %&gt;% group_by(dest) %&gt;% summarise(n = n())</code></pre>
 <pre><code>## # A tibble: 104 x 2
 ##    dest      n
@@ -183,6 +182,7 @@ $(document).ready(function () {
 ##  9 N107US   21677
 ## 10 N108UW   32070
 ## # ... with 4,027 more rows</code></pre>
+<p>Alternate way without using count:</p>
 <pre class="r"><code>not_cancelled %&gt;% group_by(tailnum) %&gt;% summarise(n = sum(distance, na.rm = TRUE))</code></pre>
 <pre><code>## # A tibble: 4,037 x 2
 ##    tailnum      n
@@ -254,8 +254,8 @@ cancelled_flight_summary %&gt;%
 </div>
 <div id="b." class="section level4">
 <h4>5 (b).</h4>
-<p>Looking at the Average arrival delay by carrier and taking the top 2 carriers that has higher avg_delay we can see that top 1 goes to 5 destination airports whereas the second top one goes to only one destination airport (DEN). Looking at the avg delay by dest for DEN, it looks like the avg delay is not so high (12) compared to the dest airport with highest avg delay of 33.6. This gives us an impression that the major cause of the delay is bad carrier.</p>
-<p>Now on the other hand looking at Avg_delay by destination airport overall and picking the one ‘JAC’ which has two carriers flying in (DL &amp; UA). Both carriers have very low average delays in general (DL = -2.7, UA = 5.16). But they have higher average delay when the destination airport is JAC, which makes us think that bad airport is the cause for this high avg delay.</p>
+<p>Looking at the Average arrival delay by carrier and taking the top 2 carriers that has higher avg_delay we can see that top 1 goes to 5 destination airports whereas the second top one goes to only one destination airport (DEN). Looking at the avg delay by dest for DEN, it looks like the avg delay is not so high (12) compared to the dest airport(TUL) with highest avg delay of 33.6. This gives us an impression that the major cause of the delay is bad carrier.</p>
+<p>Now on the other hand looking at Avg_delay by destination airport overall and picking one ‘JAC’ which has two carriers flying in (DL &amp; UA). Both carriers have very low average delays in general (DL = -2.7, UA = 5.16). But, the carriers have higher average delay (DL = 11.0, UA = 29.89) when the destination airport is JAC, which makes us think that bad airport is the cause for this high avg delay.</p>
 <p>From the above two scenarios it is hard to come to a conclusion of whether the delay is caused by bad carrier or bad airport. More or like both bad airports &amp; bad carrier is a combination factor that causes arrival delays.</p>
 <pre class="r"><code>flights %&gt;% summarise(total_carriers = n_distinct(carrier),
                       total_dest_airports = n_distinct(dest),
@@ -333,6 +333,11 @@ avg_delay_by_dest </code></pre>
 ##  9 CAK              1      19.7
 ## 10 RIC              2      17.2
 ## # ... with 95 more rows</code></pre>
+<pre class="r"><code>avg_delay_by_dest %&gt;% filter(dest == 'DEN')</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   dest  num_carriers avg_delay
+##   &lt;chr&gt;        &lt;int&gt;     &lt;dbl&gt;
+## 1 DEN              5      12.0</code></pre>
 <pre class="r"><code>avg_delay_by_flights_n_dest %&gt;% filter(dest == 'JAC' )</code></pre>
 <pre><code>## # A tibble: 2 x 3
 ## # Groups:   carrier [2]
@@ -376,12 +381,17 @@ avg_delay_by_dest </code></pre>
 <h2>Tibbles (10.5):</h2>
 <div id="section-2" class="section level4">
 <h4>1.</h4>
-<p>There are a couple of different ways to identify a tibble. a. When a tibble is printed the following is printed on top in console: “A tibble: rows X cols” Also, below each column name data type of the column is printed. b. A tibble only prints top 10 rows whereas a data frame prints the entire data frame. c. class() can be used to find out if an object is a tibble (tbl_df, tbl) or a data frame (data.frame)</p>
+<p>There are a couple of different ways to identify a tibble.</p>
+<ol style="list-style-type: lower-alpha">
+<li>When a tibble is printed the following is printed on top in console: “A tibble: rows X cols”. Also, below each column name data type of the column is printed.</li>
+<li>A tibble only prints top 10 rows whereas a data frame prints the entire data frame.</li>
+<li>class() can be used to find out if an object is a tibble (tbl_df, tbl) or a data frame (data.frame)</li>
+</ol>
 </div>
 <div id="section-3" class="section level4">
 <h4>2.</h4>
 <ol style="list-style-type: decimal">
-<li>Dataframes do partial matching of column names. i.e df$x matches x with column name “xyz” and returns that column. Whereas when called on a tibble it doesn’t recognize as there’s no column as “x” and returns error.</li>
+<li>Dataframes do partial matching of column names. i.e df$x matches x with column name “xyz” and returns that column. Whereas when called on a tibble it doesn’t recognize as there’s no column as “x” and returns error/NULL.</li>
 </ol>
 <pre class="r"><code>df &lt;- data.frame(abc = 1, xyz = &quot;a&quot;)
 df$x</code></pre>
@@ -391,7 +401,7 @@ df$x</code></pre>
 tbl$x</code></pre>
 <pre><code>## NULL</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li>When subsetting data on a dataframe, results are not always returned as data frame. Whereas, when subsetting a tibble it always returns a tibble.</li>
+<li>When subsetting data on a dataframe, results are not always returned as data frame. sometimes vectors are returned. Whereas, when subsetting a tibble it always returns a tibble.</li>
 </ol>
 <pre class="r"><code>df[, &quot;xyz&quot;]</code></pre>
 <pre><code>## [1] a
@@ -402,6 +412,218 @@ tbl$x</code></pre>
 ##   &lt;fct&gt;
 ## 1 a</code></pre>
 </div>
+<div id="section-4" class="section level4">
+<h4>3.</h4>
+<p>We can extract the reference variable from a tibble by passing the variable name in [] tibble. See example below.</p>
+<pre class="r"><code>tbl &lt;- as.tibble(mtcars)
+
+var &lt;- &quot;mpg&quot;
+
+tbl[[var]]</code></pre>
+<pre><code>##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2
+## [15] 10.4 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4
+## [29] 15.8 19.7 15.0 21.4</code></pre>
+</div>
+<div id="section-5" class="section level4">
+<h4>6.</h4>
+<p>Using the print function and passing n_extra argument’ value, we can control the number of columns printed to console.</p>
+<pre class="r"><code>tbl &lt;- as_tibble(mtcars) 
+
+print(tbl, n_extra = 7)</code></pre>
+<pre><code>## # A tibble: 32 x 11
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##  * &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  21.0  6.00   160 110    3.90  2.62  16.5  0     1.00  4.00  4.00
+##  2  21.0  6.00   160 110    3.90  2.88  17.0  0     1.00  4.00  4.00
+##  3  22.8  4.00   108  93.0  3.85  2.32  18.6  1.00  1.00  4.00  1.00
+##  4  21.4  6.00   258 110    3.08  3.22  19.4  1.00  0     3.00  1.00
+##  5  18.7  8.00   360 175    3.15  3.44  17.0  0     0     3.00  2.00
+##  6  18.1  6.00   225 105    2.76  3.46  20.2  1.00  0     3.00  1.00
+##  7  14.3  8.00   360 245    3.21  3.57  15.8  0     0     3.00  4.00
+##  8  24.4  4.00   147  62.0  3.69  3.19  20.0  1.00  0     4.00  2.00
+##  9  22.8  4.00   141  95.0  3.92  3.15  22.9  1.00  0     4.00  2.00
+## 10  19.2  6.00   168 123    3.92  3.44  18.3  1.00  0     4.00  4.00
+## # ... with 22 more rows</code></pre>
+</div>
+</div>
+<div id="spreading-gathering-12.3.3" class="section level2">
+<h2>Spreading &amp; Gathering (12.3.3):</h2>
+<div id="section-6" class="section level4">
+<h4>2.</h4>
+<p>Below code doesn’t work because in the original table4a dataset 1999 &amp; 2000 are column names that are non-syntactic (Doesn’t start with a letter). So those must be enclosed in single quotes / backticks. If not enclosed the function will look for 1999 &amp; 2000 column in the data frame which is why the error says “Position must be between 0 and n”.</p>
+<pre class="r"><code>#table4a %&gt;% 
+#  gather(1999, 2000, key = &quot;year&quot;, value = &quot;cases&quot;)
+
+## Solution
+table4a %&gt;% 
+  gather('1999', '2000', key = &quot;year&quot;, value = &quot;cases&quot;)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   country     year   cases
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;
+## 1 Afghanistan 1999     745
+## 2 Brazil      1999   37737
+## 3 China       1999  212258
+## 4 Afghanistan 2000    2666
+## 5 Brazil      2000   80488
+## 6 China       2000  213766</code></pre>
+</div>
+<div id="section-7" class="section level4">
+<h4>3.</h4>
+<p>Spreading fails here because of a duplicate row. Can add another column to represent the observation number to fix the error in Spreading.</p>
+<pre class="r"><code>people &lt;- tribble(
+  ~name,             ~key,    ~value,
+  #-----------------|--------|------
+  &quot;Phillip Woods&quot;,   &quot;age&quot;,       45,
+  &quot;Phillip Woods&quot;,   &quot;height&quot;,   186,
+  &quot;Phillip Woods&quot;,   &quot;age&quot;,       50,
+  &quot;Jessica Cordero&quot;, &quot;age&quot;,       37,
+  &quot;Jessica Cordero&quot;, &quot;height&quot;,   156
+)
+
+#spread(people, key=key, value=value)
+
+## solution 
+
+people1 &lt;- tribble(
+  ~name,             ~key,    ~value, ~observation,
+  #-----------------|--------|------|------
+  &quot;Phillip Woods&quot;,   &quot;age&quot;,       45, 1,
+  &quot;Phillip Woods&quot;,   &quot;height&quot;,   186, 1,
+  &quot;Phillip Woods&quot;,   &quot;age&quot;,       50, 2,
+  &quot;Jessica Cordero&quot;, &quot;age&quot;,       37, 1,
+  &quot;Jessica Cordero&quot;, &quot;height&quot;,   156, 1
+)
+
+spread(people1, key, value)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   name            observation   age height
+## * &lt;chr&gt;                 &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Jessica Cordero        1.00  37.0    156
+## 2 Phillip Woods          1.00  45.0    186
+## 3 Phillip Woods          2.00  50.0     NA</code></pre>
+</div>
+<div id="section-8" class="section level4">
+<h4>4.</h4>
+<p>Gathering works as a better way of tidying below data. Making the male &amp; female columns to be logical as “isFemale” and including a count column as values would tidy this data.</p>
+<pre class="r"><code>preg &lt;- tribble(
+  ~pregnant, ~male, ~female,
+  &quot;yes&quot;,     NA,    10,
+  &quot;no&quot;,      20,    12
+)
+
+
+## Solution
+
+preg %&gt;%
+  gather(male, female, key=&quot;isFemale&quot;, value=&quot;count&quot;) %&gt;%
+  mutate(isFemale = isFemale == &quot;female&quot;, 
+         isPregnant = pregnant == &quot;yes&quot;) %&gt;%
+  select(isFemale, isPregnant, count)</code></pre>
+<pre><code>## # A tibble: 4 x 3
+##   isFemale isPregnant count
+##   &lt;lgl&gt;    &lt;lgl&gt;      &lt;dbl&gt;
+## 1 F        T           NA  
+## 2 F        F           20.0
+## 3 T        T           10.0
+## 4 T        F           12.0</code></pre>
+</div>
+</div>
+<div id="separating-and-uniting-12.4.3" class="section level2">
+<h2>Separating and Uniting (12.4.3):</h2>
+<div id="section-9" class="section level4">
+<h4>1.</h4>
+<p>Extra argument to separate function tells how to handle the extra values present in a row. There are 3 options to handle this scenario:</p>
+<ol style="list-style-type: lower-alpha">
+<li>“warn” - gives warning and drops extra values</li>
+<li>“drop” - drops extra values without a warning</li>
+<li>“merge” - only splits at most length(into) times.</li>
+</ol>
+<pre class="r"><code>tibble(x = c(&quot;a,b,c&quot;, &quot;d,e,f,g&quot;, &quot;h,i,j&quot;)) %&gt;% 
+  separate(x, c(&quot;one&quot;, &quot;two&quot;, &quot;three&quot;))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   one   two   three
+## * &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 a     b     c    
+## 2 d     e     f    
+## 3 h     i     j</code></pre>
+<pre class="r"><code>tibble(x = c(&quot;a,b,c&quot;, &quot;d,e,f,g&quot;, &quot;h,i,j&quot;)) %&gt;% 
+  separate(x, c(&quot;one&quot;, &quot;two&quot;, &quot;three&quot;), extra = &quot;merge&quot;)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   one   two   three
+## * &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 a     b     c    
+## 2 d     e     f,g  
+## 3 h     i     j</code></pre>
+<p>Fill argument to separate function tells how to handle the missing values in a row. There are 3 options to handle this scneario as well:</p>
+<ol style="list-style-type: lower-alpha">
+<li>“warn” - gives a warning and fill from the right.</li>
+<li>“right” - fill with missing values on the right.</li>
+<li>“left” - fill with missing values on the left.</li>
+</ol>
+<pre class="r"><code>tibble(x = c(&quot;a,b,c&quot;, &quot;d,e&quot;, &quot;f,g,i&quot;)) %&gt;% 
+  separate(x, c(&quot;one&quot;, &quot;two&quot;, &quot;three&quot;))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   one   two   three
+## * &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 a     b     c    
+## 2 d     e     &lt;NA&gt; 
+## 3 f     g     i</code></pre>
+<pre class="r"><code>tibble(x = c(&quot;a,b,c&quot;, &quot;d,e&quot;, &quot;f,g,i&quot;)) %&gt;% 
+  separate(x, c(&quot;one&quot;, &quot;two&quot;, &quot;three&quot;), fill = &quot;right&quot;)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   one   two   three
+## * &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 a     b     c    
+## 2 d     e     &lt;NA&gt; 
+## 3 f     g     i</code></pre>
+<pre class="r"><code>tibble(x = c(&quot;a,b,c&quot;, &quot;d,e&quot;, &quot;f,g,i&quot;)) %&gt;% 
+  separate(x, c(&quot;one&quot;, &quot;two&quot;, &quot;three&quot;), fill = &quot;left&quot;)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   one   two   three
+## * &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 a     b     c    
+## 2 &lt;NA&gt;  d     e    
+## 3 f     g     i</code></pre>
+</div>
+<div id="section-10" class="section level4">
+<h4>2.</h4>
+<p>If Remove argument is set to TRUE it will remove the input column from the output data frame. This can be set to FALSE when you want to create a new variable but keep the old one as well.</p>
+</div>
+</div>
+<div id="import-data-file-sample" class="section level2">
+<h2>Import Data File sample:</h2>
+<pre class="r"><code>directory = getwd()
+
+file_path &lt;- './Input/baby_names.txt'
+
+baby_names &lt;- read_delim(file_path, delim = '|')</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   year = col_integer(),
+##   sex = col_character(),
+##   name = col_character(),
+##   n = col_integer(),
+##   prop = col_double()
+## )</code></pre>
+<pre class="r"><code>glimpse(baby_names)</code></pre>
+<pre><code>## Observations: 30,000
+## Variables: 5
+## $ year &lt;int&gt; 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 188...
+## $ sex  &lt;chr&gt; &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F...
+## $ name &lt;chr&gt; &quot;Mary&quot;, &quot;Anna&quot;, &quot;Emma&quot;, &quot;Elizabeth&quot;, &quot;Minnie&quot;, &quot;Margaret&quot;...
+## $ n    &lt;int&gt; 7065, 2604, 2003, 1939, 1746, 1578, 1472, 1414, 1320, 128...
+## $ prop &lt;dbl&gt; 0.072384329, 0.026679234, 0.020521700, 0.019865989, 0.017...</code></pre>
+<pre class="r"><code>saveRDS(baby_names, file = './Output/baby_names.rds')</code></pre>
+<pre class="r"><code>baby_names_rds &lt;- readRDS(file = './Output/baby_names.rds')
+
+glimpse(baby_names_rds)</code></pre>
+<pre><code>## Observations: 30,000
+## Variables: 5
+## $ year &lt;int&gt; 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 1880, 188...
+## $ sex  &lt;chr&gt; &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F...
+## $ name &lt;chr&gt; &quot;Mary&quot;, &quot;Anna&quot;, &quot;Emma&quot;, &quot;Elizabeth&quot;, &quot;Minnie&quot;, &quot;Margaret&quot;...
+## $ n    &lt;int&gt; 7065, 2604, 2003, 1939, 1746, 1578, 1472, 1414, 1320, 128...
+## $ prop &lt;dbl&gt; 0.072384329, 0.026679234, 0.020521700, 0.019865989, 0.017...</code></pre>
 </div>
 
 

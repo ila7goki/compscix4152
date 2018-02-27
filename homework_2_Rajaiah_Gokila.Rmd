@@ -1,5 +1,5 @@
 ---
-title: "COMPSCIX 415.2 Homework 1"
+title: "COMPSCIX 415.2 Homework 2"
 author: "Gokila Rajaiah"
 date: "February 6, 2018"
 output: html_document
