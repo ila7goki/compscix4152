@@ -5,7 +5,10 @@ date: "March 3, 2018"
 output:
   html_document:
     toc: true
-    toc_depth: 2
+    toc_float: true
+    theme: united
+    highlight: tango
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -19,27 +22,34 @@ library(tidyverse)
 
 #### 1. 
 
-Below list gives packages for differnt tasks related to data.
+Below are the packages used for various data tasks:
 
-  * Plotting - ggplot2
-  * Data munging/Wrangling - dplyr
-  * Reshaping (gathering/spreading) data - tidyr
-  * Importing/Exporting data - readr
+
+  |Data Task              | Package |
+  |-----------------------|-------- |
+  |Plotting               | ggplot2 |
+  |Data munging/Wrangling | dplyr   |
+  |Reshaping (gathering/spreading) data | tidyr   |
+  |Importing/Exporting data| readr  |
+  
   
 #### 2.
 
-Functions from all the above task related packages.
+Popular functions from each of the above packages.
 
-  * Plotting - ggplot(), geom_point(), facet_wrap()
-  * Data munging/Wrangling - select(), filter(), arrange()
-  * Reshaping data - mutate(), gather(), separate()
-  * Importing/Exporting data - read_csv(), write_csv(), parse_*() functions.
+  |Data Task                              | Common Functions                    |
+  |---------------------------------------|-------------------------------------|
+  |Plotting (ggplot2)                     | ggplot(), geom_point(), facet_wrap()|
+  |Data munging/Wrangling (dplyr)         | select(), filter(), arrange()       |
+  |Reshaping data (tidyr)                 | mutate(), gather(), separate()      |
+  |Importing/Exporting data (readr)       | read_csv(), write_csv(), parse_*() functions|
+
   
 ## R Basics
 
 #### 1.
 
-Remove '!' from the variable name. 
+Fix by removing '!' from the variable name. 
 
 ```{r}
 
@@ -49,7 +59,7 @@ My_data.name___is.too00ooLong <- c( 1 , 2   , 3 )
 
 #### 2.
 
-Fix: 'C' in uppercase changed to lowercase. Added close ' after "it" item. 
+Fix by changing 'C' in uppercase to lowercase. Added close param (') after "it" item. 
 
 ```{r}
 
@@ -107,12 +117,14 @@ glimpse(rail_textRds)
 
 ## Visualization:
 
-1. Though at a quick first glance the chart seems to be showing that most % of  different group of people are favoring towards Women President in their lifetime, i.e. all left bubbles (Yes) are big compared to the other, this chart is totally wrong. 
+#### 1. 
+
+Though at a quick first glance the chart seems to be showing that most % of  different group of people are favoring towards Women President in their lifetime, i.e. all left bubbles (Yes) are big compared to the other, this chart is totally wrong. 
 
   * Title says that below data shows Percentage of respondents. But each of the category breakdown don't add up to 100%.
   * Even if the % values are corrected, this chart doesn't show what was the total Respondents & % of each category of respondents (i.e Age group <45, 45-60, 60+ and Gender type Male/Female).so the chart is not so useful. 
   
-2. 
+#### 2. 
 
 ```{r fig.align='center', fig.height=7, fig.width=10}
 
@@ -124,7 +136,7 @@ ggplot(data = diamonds, mapping = aes(x=cut, y=carat, fill=color)) +
 
 ```
 
-3. 
+#### 3. 
 
 In the above plot we can't really tell the color vs carat under each type of cut. If we change the position to "Dodge", you can tell the range of diamond's weight (Carat) for each color & cut type.   
 
@@ -143,8 +155,7 @@ ggplot(data = diamonds, mapping = aes(x=cut, y=carat, fill=color)) +
 
 #### 1. 
 
-In table2 one observation is spread across two rows where one row has the total population and another row shows total cases. In order to tidy this data we need to use spread(). 
-
+In table2 one observation is spread across two rows where one row has the total population and another row shows total cases. In order to tidy this data we need to use spread(). This way all the variables are column in the resulting dataset.
 
 
 ```{r}
@@ -156,7 +167,9 @@ table2 %>%
 
 #### 2.
 
-```{r}
+Note: setting eval to False in R Chunk won't execute the code in the output html
+
+```{r eval=FALSE}
 diamonds %>%
   mutate(price_per_carat = (price/carat))
 
@@ -168,15 +181,29 @@ diamonds %>%
 
 ```{r}
 
-diamonds
-
 diamonds %>% 
   group_by(cut) %>%
   summarise(num_diamonds = sum(price > 10000.0 & carat < 1.5),
-            prop_diamonds = mean(price > 10000 & carat < 1.5)
+            prop_diamonds = mean(price > 10000 & carat < 1.5),
+            n = n()
   )
 
+#diamonds %>%
+#  filter(price > 10000 & carat < 1.5)
+
 ```
+
+##### a.
+
+In general diamonds which are Ideal should have less price with higher carat.
+After filtering for the price > 10000 and carat < 1.5,  we are seeing a higher number of ideal diamonds with that higher price range. But, I expected to see more number of Premium diamonds with that filter condition. 
+
+
+##### b.
+
+We should be wary of looking at the total diamonds for each cut type and consider the proportion of diamonds column.
+
+Else at a first thought Proportion column seems to tell the % of Ideal diamonds out of the Total diamonds (filtered with price > 10000 & carat < 1.5), wherein it actually is the proportion of diamonds of that type with price > 10000 & carat < 1.5 out of all the diamonds of that type (i.e n in above table)
 
 
 
@@ -184,7 +211,7 @@ diamonds %>%
 
 #### 1. 
 
-"txhousing" data is from the years between 2000 - 2009 (inclusive).
+"txhousing" data is from the years between 2000 - 2015 (inclusive).
 
 
 ```{r}
@@ -209,12 +236,134 @@ glimpse(city_txhousing)
 
 #### 3.
 
+Houston, July 2015 had the highest sales with total sales of 8945.
+
 ```{r}
 
-txhousing
+txhousing %>% 
+  group_by(city, year, month) %>%
+  summarise(TotalSales = sum(sales)) %>%
+  arrange(desc(TotalSales))
 
 ```
   
+#### 4.
+
+In general we seem to expect that when you have more number of listings you should have seen more number of sales. 
+This data also shows a somewhat linear relationship between Total listings & Total Sales. 
+
+From the below scatter plot between total listings & total sales we can see that as the number of listings increases the total number of sales is also higher. 
+
+Another interesting fact is we have more number of obeservations where number of listing is low. 
+
+```{r, warning=FALSE, error=FALSE, message=FALSE, fig.height=7, fig.width=10}
+
+sales_summary <- txhousing %>% 
+  group_by(city, year, month) %>%
+  summarise(TotalSales = sum(sales),
+            TotalListings = sum(listings), 
+            MedianSalePrice = median(median)
+            ) %>%
+  arrange(desc(TotalSales))
+
+ggplot(data = sales_summary, mapping = aes(x=TotalListings, y=TotalSales)) +
+  geom_point() +
+  geom_smooth()
+
+```
+
+#### 5. 
+
+Proportion of missing sales in each city:
+
+```{r}
+
+txhousing %>% 
+  group_by(city) %>%
+  summarise(missin_sales_prop = mean(is.na(sales))
+          )
+
+```
+
+#### 6.
+
+###### a. 
+
+yes. Median price changes when groped by city.But not so much. 
+Median Sales price overall = ~1.572 M. Whereas when grouped by city we can see that Median sales price ranges between 1.146M to 1.96M and the overall median price is 1.554M which is slightly less. 
+
+```{r, error=FALSE, message=FALSE, fig.height=7, fig.width=10}
+
+above500_sales <- filter(txhousing, sales > 500)
+
+above500_sales %>%
+  group_by(city) %>%
+  summarise(Median_price = median(median)) %>%
+  ggplot() + geom_point(mapping = aes(x=reorder(city, Median_price), y=Median_price)) +
+  coord_flip()
+
+above500_sales %>%
+  ggplot() + geom_boxplot(mapping = aes(x=reorder(city, median), y=median)) +
+  coord_flip()
+
+above500_sales %>% summarise(m = median(median)) # 157200
+
+
+#above500_sales %>%
+#  group_by(city) %>%
+#  summarise(Median_price = median(median)) %>%
+#  arrange(desc(Median_price)) %>%
+#  summarise(m = median(Median_price))
+
+
+```
+ 
+###### b. 
+
+When plotting the median price grouped by city over the year I see that for 'Montgomery County' the box overlaps and appears across wider time range. Looking at the data for this city I dind't see anything out of the ordinary. So not sure why the plot appears this way. 
+
+  * Apart from that In the City vs Median chart the two cities that looks out of the ordinary is "Corpus Christi" and looking at the data for that city noticed that there are no observations after year 2006. 
+  
+  * Other insights that pops up,
+      * Collin County, Montgomery County, Fort Bend, Austin seem to be having more observations with sale price higher than median sale price. 
+      * Fort Bend city has more wider range of median sale price compared to other cities. 
+      
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+
+above500_sales %>%
+  group_by(year, city) %>%
+  summarise(median = median(median, na.rm = TRUE)) %>%
+  ggplot(aes(year, median)) + geom_boxplot(aes(fill = city))
+
+above500_sales %>%
+  group_by(year, city) %>%
+  summarise(median = median(median, na.rm = TRUE)) %>%
+  filter(city == 'Montgomery County')
+
+above500_sales %>%
+  filter(city == 'Corpus Christi')
+
+#txhousing %>%
+#  filter(city == 'Arlington' & sales > 500)
+
+
+```
+
+###### c.
+
+Looking at the City vs Sales boxplot below we can see that there are several cities with very low sales. Generally any data with low value is not of higher importance so we filter them out in order to have a more deeper look into the things that has higher values. (Unless we are analyzing the data of low sales). So it is good idea to filter the values that are chump change. 
+
+
+
+```{r}
+
+
+txhousing %>%
+  ggplot() + geom_boxplot(mapping = aes(x=city, y=sales)) + coord_flip()
+
+
+```
+
 
 
 
