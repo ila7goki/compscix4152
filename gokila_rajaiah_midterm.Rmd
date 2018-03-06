@@ -280,16 +280,16 @@ Proportion of missing sales in each city:
 
 txhousing %>% 
   group_by(city) %>%
-  summarise(missin_sales_prop = mean(is.na(sales))
+  summarise(missing_sales_prop = mean(is.na(sales))
           )
 
 ```
 
 #### 6.
 
-###### a. 
+##### a. 
 
-yes. Median price changes when groped by city.But not so much. 
+Yes. Median price changes when groped by city.But not so much. 
 Median Sales price overall = ~1.572 M. Whereas when grouped by city we can see that Median sales price ranges between 1.146M to 1.96M and the overall median price is 1.554M which is slightly less. 
 
 ```{r, error=FALSE, message=FALSE, fig.height=7, fig.width=10}
@@ -318,7 +318,7 @@ above500_sales %>% summarise(m = median(median)) # 157200
 
 ```
  
-###### b. 
+##### b. 
 
 When plotting the median price grouped by city over the year I see that for 'Montgomery County' the box overlaps and appears across wider time range. Looking at the data for this city I dind't see anything out of the ordinary. So not sure why the plot appears this way. 
 
@@ -349,7 +349,7 @@ above500_sales %>%
 
 ```
 
-###### c.
+##### c.
 
 Looking at the City vs Sales boxplot below we can see that there are several cities with very low sales. Generally any data with low value is not of higher importance so we filter them out in order to have a more deeper look into the things that has higher values. (Unless we are analyzing the data of low sales). So it is good idea to filter the values that are chump change. 
 
