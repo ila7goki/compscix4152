@@ -1,0 +1,162 @@
+---
+title: "COMPSCIX 415.2 Homework 6"
+author: "Gokila Rajaiah"
+date: "March 12, 2018"
+output:
+  html_document:
+    df_print: paged
+    highlight: tango
+    theme: united
+  pdf_document: default
+---
+
+```{r setup}
+
+library(mosaicData)
+library(tidyverse)
+library(dplyr)
+
+```
+
+#### Exercise 1.
+
+###### 1.
+
+Following are the 3 variables in Whickam dataset:
+  a. outcome
+  b. smoker
+  c. age
+
+```{r}
+
+glimpse(Whickham)
+
+```
+
+###### 2.
+
+There are 1314 observations of a survey sample of Women classified as current smokers or having never smoked, age & their survival status after 20 years. 
+
+###### 3.
+
+
+```{r error=FALSE}
+
+#class(Whickham)
+
+#table1 <- Whickham %>% count(smoker, outcome)
+
+#table1
+
+#Whickham %>% count(smoker, outcome) %>%
+ # ggplot(data = table1, mapping = aes(x = smoker, y = outcome)) + geom_tile(mapping=aes(fill=freq))
+
+```
+
+###### 4.
+
+
+```{r}
+
+#Whickham %>%
+ # mutate(age_range = case_when(age <= 44 ~ '<=44',
+                               #age > 44 & age <= 64 ~ '44<x<=64',
+                               #age > 64 ~ '>64')) %>%
+  #count(vars=c("outcome", "smoker", "age_range")) %>%
+  #ggplot(mapping = aes(x = smoker, y = outcome)) + 
+  #geom_tile(mapping=aes(fill=freq)) +
+  #facet_wrap(~ age_range)
+
+```
+
+#### Exercise 2.
+
+###### 1.
+
+```{r}
+
+n <- 10000
+
+# Get a 10K sample of gamma distribution func.
+gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2))
+
+#gamma_samp
+
+
+ggplot(gamma_samp, aes(x=x)) + geom_density() +
+ggtitle("Gamma distribution sample density curve")
+
+ggplot(gamma_samp, mapping = aes(x)) + geom_histogram()
+
+```
+
+
+###### 2.
+
+Yes. Both Mean & Standard Deviation are close to 2.0
+
+```{r}
+
+mean_samp <- gamma_samp %>% .[['x']] %>% mean()
+sd_samp <- gamma_samp %>% .[['x']] %>% sd()
+
+mean_samp
+sd_samp
+```
+
+###### 3.
+
+```{R}
+
+n <- 30
+
+# Get a 10K sample of gamma distribution func.
+gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2))
+
+#gamma_samp
+
+
+ggplot(gamma_samp, aes(x=x)) + geom_density() +
+ggtitle("Gamma distribution sample density curve")
+
+ggplot(gamma_samp, mapping = aes(x)) + geom_histogram()
+
+mean_samp <- gamma_samp %>% .[['x']] %>% mean()
+sd_samp <- gamma_samp %>% .[['x']] %>% sd()
+
+mean_samp
+sd_samp
+
+```
+
+
+
+```{r}
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, 10000)
+
+# start a loop
+for(i in 1:10000) {
+  g_samp <- tibble(x = rgamma(30, shape = 1, scale = 2))
+  
+  mean_samp[i] <- g_samp %>% .[['x']] %>% mean()
+}
+# Convert vector to a tibble
+mean_samp_t <- tibble(mean_samp)
+mean_samp_t
+
+ggplot(mean_samp_t, mapping = aes(mean_samp)) +
+  geom_histogram()
+
+```
+
+```{r}
+
+mean_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% mean()
+sd_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% sd()
+
+mean_mean_samp_t
+sd_mean_samp_t
+
+```
