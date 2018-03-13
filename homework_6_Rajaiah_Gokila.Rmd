@@ -10,11 +10,11 @@ output:
   pdf_document: default
 ---
 
-```{r setup}
+```{r setup, message=FALSE}
 
 library(mosaicData)
 library(tidyverse)
-library(dplyr)
+library(plyr)
 
 ```
 
@@ -23,9 +23,10 @@ library(dplyr)
 ###### 1.
 
 Following are the 3 variables in Whickam dataset:
-  a. outcome
-  b. smoker
-  c. age
+
+a.  outcome
+b.  smoker
+c.  age
 
 ```{r}
 
@@ -39,33 +40,43 @@ There are 1314 observations of a survey sample of Women classified as current sm
 
 ###### 3.
 
+Overall number of dead (range 200 - 300) is less than number of Alive (400-500). But, the number of non-smokers who are dead (range ~300) is higher than smokers who are dead (~200) which is quite not clear to understand as we expect to see more number of deaths of smokers. 
 
-```{r error=FALSE}
+
+
+```{r error=FALSE, message=FALSE, fig.align='center'}
 
 #class(Whickham)
+library(plyr)
 
-#table1 <- Whickham %>% count(smoker, outcome)
+smoker_outcome <- Whickham %>% count(c("smoker", "outcome"))
 
-#table1
+smoker_outcome
 
-#Whickham %>% count(smoker, outcome) %>%
- # ggplot(data = table1, mapping = aes(x = smoker, y = outcome)) + geom_tile(mapping=aes(fill=freq))
+ggplot(smoker_outcome, mapping = aes(x = smoker, y = outcome)) + 
+  geom_tile(mapping=aes(fill=freq)) +
+  ggtitle("Tile Plot Smoker vs Outcome")
 
 ```
 
 ###### 4.
 
+When the smoker's death/alive rate is grouped by their age-group we can see that those who fall under age-group of 44 to 64 we see more number of people who smoke and their death rate is also high than death rate of those people who don't smoke. People of age group less than 44 seem to have lesser death rate and it seems like smoking criteria doesn't seem to affect that age group. 
+Looking at the chart broken by age-group makes more sense as our theory matches with the data. 
 
-```{r}
+```{r, fig.align='center'}
 
-#Whickham %>%
- # mutate(age_range = case_when(age <= 44 ~ '<=44',
-                               #age > 44 & age <= 64 ~ '44<x<=64',
-                               #age > 64 ~ '>64')) %>%
-  #count(vars=c("outcome", "smoker", "age_range")) %>%
-  #ggplot(mapping = aes(x = smoker, y = outcome)) + 
-  #geom_tile(mapping=aes(fill=freq)) +
-  #facet_wrap(~ age_range)
+out_table <- Whickham %>%
+  mutate(age_range = case_when(age <= 44 ~ '<=44',
+                               age > 44 & age <= 64 ~ '44<x<=64',
+                               age > 64 ~ '>64')) %>%
+  count(vars=c("outcome", "smoker", "age_range")) 
+
+
+  ggplot(out_table, mapping = aes(x = smoker, y = outcome)) + 
+    geom_tile(mapping=aes(fill=freq)) +
+    facet_wrap(~ age_range) +
+    ggtitle("Tile Plot Smoker vs Outcome grouped by age-range")
 
 ```
 
@@ -73,7 +84,7 @@ There are 1314 observations of a survey sample of Women classified as current sm
 
 ###### 1.
 
-```{r}
+```{r, message=FALSE, fig.align='center'}
 
 n <- 10000
 
@@ -84,7 +95,7 @@ gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2))
 
 
 ggplot(gamma_samp, aes(x=x)) + geom_density() +
-ggtitle("Gamma distribution sample density curve")
+ggtitle("Gamma distribution sample(10000) density curve")
 
 ggplot(gamma_samp, mapping = aes(x)) + geom_histogram()
 
@@ -95,7 +106,7 @@ ggplot(gamma_samp, mapping = aes(x)) + geom_histogram()
 
 Yes. Both Mean & Standard Deviation are close to 2.0
 
-```{r}
+```{r, message=FALSE, fig.align='center'}
 
 mean_samp <- gamma_samp %>% .[['x']] %>% mean()
 sd_samp <- gamma_samp %>% .[['x']] %>% sd()
@@ -106,7 +117,9 @@ sd_samp
 
 ###### 3.
 
-```{R}
+Histogram, Density Curve, Mean & Standard deviation with a sample size of 30
+
+```{r, message=FALSE, fig.align='center'}
 
 n <- 30
 
@@ -117,21 +130,22 @@ gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2))
 
 
 ggplot(gamma_samp, aes(x=x)) + geom_density() +
-ggtitle("Gamma distribution sample density curve")
+ggtitle("Gamma distribution sample(30) density curve")
 
 ggplot(gamma_samp, mapping = aes(x)) + geom_histogram()
 
-mean_samp <- gamma_samp %>% .[['x']] %>% mean()
-sd_samp <- gamma_samp %>% .[['x']] %>% sd()
+(mean_samp <- gamma_samp %>% .[['x']] %>% mean())
+(sd_samp <- gamma_samp %>% .[['x']] %>% sd())
 
-mean_samp
-sd_samp
 
 ```
 
 
+###### 4.
 
-```{r}
+Taking Mean & SD of 30 samples 10K times
+
+```{r, message=FALSE, fig.align='center'}
 
 # create a vector with 10000 NAs
 mean_samp <- rep(NA, 10000)
@@ -143,20 +157,67 @@ for(i in 1:10000) {
   mean_samp[i] <- g_samp %>% .[['x']] %>% mean()
 }
 # Convert vector to a tibble
-mean_samp_t <- tibble(mean_samp)
-mean_samp_t
-
-ggplot(mean_samp_t, mapping = aes(mean_samp)) +
-  geom_histogram()
+(mean_samp_t <- tibble(mean_samp))
 
 ```
 
-```{r}
+###### 5. 
+
+Histogram of 10K Sample Means:
+
+```{r, message=FALSE, fig.align='center'}
+ggplot(mean_samp_t, mapping = aes(mean_samp)) +
+  geom_histogram() +
+  ggtitle("Histogram of 10K collection of mean of 30 samples")
+
+```
+
+###### 6.
+
+Mean & SD of sample means
+
+```{r, message=FALSE}
 
 mean_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% mean()
 sd_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% sd()
 
 mean_mean_samp_t
 sd_mean_samp_t
+
+```
+
+###### 7.
+
+Mean of sample means is close to 2.0, which is expected. But Standard Deviation of all the mean samples is so different (0.36) from the standard devitaion of one sample (2.0)
+
+###### 8.
+
+Yes. Mean & Standard Deviation of a sample means using sample size 300 is matching up with the central limit theroem. 
+Mean is close to 2 and Standard deviation is $$\frac{\alpha}{\sqrt{n}} = \frac{2}{\sqrt{300}} = 0.11$$
+
+```{r, message=FALSE, fig.align='CENTER'}
+
+sample_size = 300
+repeat_times = 10000
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, repeat_times)
+
+# start a loop
+for(i in 1:repeat_times) {
+  g_samp <- tibble(x = rgamma(sample_size, shape = 1, scale = 2))
+  
+  mean_samp[i] <- g_samp %>% .[['x']] %>% mean()
+}
+# Convert vector to a tibble
+mean_samp_t <- tibble(mean_samp)
+mean_samp_t
+
+
+ggplot(mean_samp_t, mapping = aes(mean_samp)) +
+  geom_histogram()
+
+(mean_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% mean())
+(sd_mean_samp_t <- mean_samp_t %>% .[['mean_samp']] %>% sd())
 
 ```
