@@ -1,0 +1,157 @@
+---
+title: "COMPSCIX 415.2 Homework 7"
+author: "Gokila Rajaiah"
+date: "March 19, 2018"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(broom)
+
+```
+
+
+#### 1.
+
+There are 1460 observations of 81 variables in the house prices training data.
+
+```{r, results='hide'}
+
+file_path <- './Input/train.csv'
+
+house_price_data <- read.csv(file_path)
+
+glimpse(house_price_data)
+
+```
+
+
+#### 2.
+
+```{R}
+
+set.seed(29283)
+
+train_set <- house_price_data %>% sample_frac(0.7)
+
+
+test_set <- house_price_data %>% filter(!(Id %in% train_set$Id))
+
+
+
+```
+#### 3.
+
+```{R}
+
+# Fit a model with intercept only
+mod_0 <- lm(SalePrice ~ 1, data = train_set)
+
+mod_0
+
+# Double-check that the average SalePrice is equal to our model's coefficient
+mean(train_set$SalePrice)
+
+tidy(mod_0)
+
+# Check the R-squared
+glance(mod_0)
+
+
+```
+#### 4.
+
+
+```{R}
+
+ggplot(data=train_set, mapping = aes(x=GrLivArea, y=SalePrice)) +
+  geom_point() +
+  geom_smooth()
+
+ggplot(data=train_set, mapping = aes(x=Neighborhood, y=SalePrice, color=OverallQual)) +
+  geom_point() +
+  coord_flip()
+
+ggplot(data=train_set, mapping = aes(x=OverallQual, y=SalePrice)) +
+  geom_point()
+
+```
+
+
+
+```{r}
+# Fit a model with 3 variables 
+mod_1 <- lm(SalePrice ~ GrLivArea + OverallQual + Neighborhood, data = train_set)
+
+mod_1
+
+#Look into model's summary data like p value
+tidy(mod_1)
+
+# Check the R-squared
+glance(mod_1)
+
+
+```
+
+  a. For every one square feet of above grade living area the price increases by 62.78
+     For every level of overall quality of the material and finish the price increases by 21,692.23
+     
+  b. All the neighborhoods will have mean price difference of their respective co-efficient values in comparison with Neighborhood "Bloomington Heights".ex: Neighborhood Bluestem & Bloomington heights has a mean price difference of -38288.88
+  
+  c&d. P values to neighborhood are higher and closer to 1 in most of the cases which indicates that this may not be a significant feature to apply for this linear model. However, in general neighborhood always have a strong relationship to the sale price of the house. 
+  
+  * P value to OverallQual & GrLivArea is closer to 0 and that indicates that these can be significant features that can be used. However OverallQual seems to be categorical variable similar to neighborhood. since the values in the data are numbers they are not considered categorical. We can re-try applying this after converting the OVerallQual to be a factor. 
+    
+  * Practically  Above grade living area doesn't seem to be a significant feature that can impact the sale price. But, OverallQual of the material and finish of the house is considered to be a significant factor which can have an impact in the sale price of the house. 
+    
+  * $R^2$ value of 0.80 indicates that model is a good fit to the training set data.
+     
+####5.
+
+There is a noise of approx ~$41,915.27 in the model used to predict the sales price. i.e . RMSE is Standard deviation of the residuals and it shows the spread of the points about the fitted line. 
+
+```{R}
+test_predictions <- predict(mod_1, newdata = test_set)
+
+op <- data.frame(test_set$Id, test_predictions)
+
+
+rmse <- sqrt(mean((test_set$SalePrice - op$test_predictions)^2))
+
+rmse
+
+
+```
+
+#### 7.
+
+First thing I notice about the predicted results of the model is that it's going predict the same value for the same coefficient & Feature variable' value. 
+But whereas in the test data y varies even though it is dependent on x. So, there's always going to be noise in the model that is developed for this kind of randomly generated unsual values where there's no relationship between x & y. 
+
+```{R}
+sim1a <- tibble(
+  x = rep(1:10, each = 3),
+  y = x * 1.5 + 6 + rt(length(x), df = 2)
+)
+
+sim1a_test <- tibble(
+  x = rep(1:10, each = 3),
+  y = x * 1.5 + 6 + rt(length(x), df = 2)
+)
+
+sim_lm <- lm(y ~ x, sim1a) 
+
+tidy(sim_lm)
+
+glance(sim_lm)
+
+sim1a_test
+
+tt <- predict(sim_lm, sim1a_test)
+
+tt
+```
