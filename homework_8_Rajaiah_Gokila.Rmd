@@ -1,0 +1,213 @@
+---
+title: "COMPSCIX 415.2 Homework 8"
+author: "Gokila Rajaiah"
+date: "March 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+
+
+
+```
+
+#### 1. 
+
+There are 891 observations of 12 variables in the titanic training data. 
+
+```{r}
+
+file_path <- './Input/train_hw8.csv'
+
+titanic_data <- read.csv(file_path)
+
+glimpse(titanic_data)
+
+
+#convert target variable (Survived) to be a factor so that it is not loaded as integer. 
+
+titanic_data <- titanic_data %>%
+  mutate(Survived_fct = factor(Survived, ordered = FALSE),
+         Pclass_fct = factor(Pclass, ordered = FALSE))
+
+#titanic_data <- titanic_data %>%
+#  mutate(survived_fct = factor(case_when(Survived == 0 ~ 'No',
+#                                         Survived == 1 ~ 'Yes')))
+
+```
+
+#### 2.
+
+```{r, error=FALSE, message=FALSE}
+
+#prepare training & test set from the data
+
+set.seed(29283)
+
+train_set <- titanic_data %>% sample_frac(0.7)
+
+
+test_set <- titanic_data %>% filter(!(PassengerId %in% train_set$PassengerId))
+
+
+```
+
+```{r}
+
+ggplot(data = titanic_data, mapping = aes(x=Age, y=Survived_fct)) +
+  geom_point(aes(color=Sex))
+
+
+ggplot(titanic_data, aes(Pclass, fill=Survived_fct)) +
+  geom_histogram(position='dodge')
+
+ggplot(titanic_data, aes(Age, fill=Survived_fct)) +
+  geom_histogram(position='dodge')
+
+
+```
+
+
+#### 3.
+
+Looking the features Age, Sex & PClass we can see that 
+  * % of first class people survived it higher than % of third class people who did not survive is higher. 
+  * % of children/infants survived is higher.
+  * % of Females survived is higher than Males.
+  
+Looking at the logistic regression model coeff, 
+  * A decrease in Age is associated with increased probability of survival. 
+  * log Odds of survival for Male is -2.66.i.e. the odds of survival for Male is exp(-2.66)
+  
+```{r}
+
+library(broom)
+
+# Fit a model with intercept only
+mod_1 <- glm(Survived_fct ~ Age+Pclass+Sex, data = train_set, family = 'binomial')
+
+# take a look at the features and coefficients
+tidy(mod_1)
+
+```
+
+#### 4. 
+
+Note: I am getting the following error: Error: all(fitted[["(fitted)"]] %in% nt) is not TRUE when trying to plot the tree using partykit with 3 features in the model. 
+
+```{r, error=FALSE, message=FALSE}
+
+library("rpart")
+library("partykit")
+
+
+tree_mod <- rpart(Survived_fct ~ Sex+Pclass_fct+Age, data = train_set)
+
+plot(tree_mod)
+text(tree_mod, use.n = TRUE)
+
+#summary(tree_mod)
+
+#as.party(tree_mod)
+
+#plot(as.party(tree_mod))
+
+```
+
+
+#### 5.
+
+```{r, error=FALSE, message=FALSE}
+test_logit <- predict(mod_1, newdata = test_set, type = 'response')
+test_tree <- predict(tree_mod, newdata = test_set)[,2]
+
+#test_logit
+#test_tree
+```
+
+```{r}
+
+library(ROCR)
+
+# create the prediction objects for both models
+pred_logit <- prediction(predictions = test_logit, labels = test_set$Survived)
+pred_tree <- prediction(predictions = test_tree, labels = test_set$Survived)
+
+
+# get the FPR and TPR for the logistic model
+# recall that the ROC curve plots the FPR on the x-axis
+perf_logit <- performance(pred_logit, measure = 'tpr', x.measure = 'fpr')
+perf_logit_tbl <- tibble(perf_logit@x.values[[1]], perf_logit@y.values[[1]])
+
+# Change the names of the columns of the tibble
+names(perf_logit_tbl) <- c('fpr', 'tpr')
+
+# get the FPR and TPR for the tree model
+perf_tree <- performance(pred_tree, measure = 'tpr', x.measure = 'fpr')
+perf_tree_tbl <- tibble(perf_tree@x.values[[1]], perf_tree@y.values[[1]])
+
+# Change the names of the columns of the tibble
+names(perf_tree_tbl) <- c('fpr', 'tpr')
+
+# Plotting function for plotting a nice ROC curve using ggplot
+plot_roc <- function(perf_tbl) {
+  p <- ggplot(data = perf_tbl, aes(x = fpr, y = tpr)) +
+  geom_line(color = 'blue') +
+  geom_abline(intercept = 0, slope = 1, lty = 3) +
+  labs(x = 'False positive rate', y = 'True positive rate') +
+  theme_bw()
+  return(p)
+}
+
+
+# Create the ROC curves using the function we created above
+plot_roc(perf_logit_tbl)
+plot_roc(perf_tree_tbl)
+
+```
+
+
+Looking at the AUC values it looks like Decision tree model is performing a little better than logistic regression model. 
+
+```{r}
+
+auc_logit <- performance(pred_logit, measure = 'auc')
+auc_tree <- performance(pred_tree, measure = 'auc')
+
+# extract the AUC value
+auc_logit@y.values[[1]]
+auc_tree@y.values[[1]]
+
+
+```
+
+
+#### 5.
+
+```{r}
+
+
+test_set_t <- test_set %>% 
+              mutate(pred_logit_prob = test_logit)
+
+test_set_t <- test_set_t %>%
+                mutate(pred_tree_prob = test_tree)
+
+
+test_set_t <- test_set_t %>%
+                mutate(pred_logit_val = case_when(pred_logit_prob >= 0.25 ~ 'Yes',
+                                                  pred_logit_prob < 0.25 ~ 'No'))
+
+
+test_set_t <- test_set_t %>%
+                mutate(pred_tree_val = case_when(pred_tree_prob >= 0.25 ~ 'Yes',
+                                                  pred_tree_prob < 0.25 ~ 'No'))
+
+test_set_t %>% count(pred_logit_val, Survived) %>% spread(Survived, n)
+test_set_t %>% count(pred_tree_val, Survived) %>% spread(Survived, n)
+
+
+```
+
