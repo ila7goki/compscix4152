@@ -11,7 +11,10 @@ output: html_document
 
 library(tidyverse)
 library(modelr)
-
+library(rpart)
+library(partykit)
+library(randomForest)
+library(ROCR)
 
 ```
 
@@ -95,3 +98,124 @@ input_data %>% summarize(se = sd(Age, na.rm = TRUE)/sqrt(891))
 
 
 ```
+
+
+## Random Forest
+
+#### 1.
+```{R}
+
+set.seed(987)
+
+model_data <- resample_partition(input_data, c(test = 0.3, train = 0.7))
+train_set <- as.tibble(model_data$train)
+test_set <- as.tibble(model_data$test)
+
+glimpse(train_set)
+glimpse(test_set)
+
+```
+
+
+#### 2.
+
+comparing the tree plot of the model with more features with that one of only three features (Sex, Pclass & Fare) we see the tree is bigger i.e. more number of nodes and levels. 
+
+In both the tree plot we can see that first split occurs in the feature Sex which shows that this is a strong one. Also, Pclass split happens at value 2.5 which is same as the model with just 3 features. 
+
+Fare feature splits at different values in both. 
+
+```{R}
+tree_mod <- rpart(Survived_fct ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked, data = input_data)
+
+plot(as.party(tree_mod))
+
+
+```
+
+#### 3.
+```{R}
+
+
+rf_mod <- randomForest(Survived_fct ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked,
+                         data = train_set,
+                         ntrees = 500, 
+                         mtry = 4, 
+                         na.action = na.roughfix)
+
+rf_mod
+
+```
+
+
+#### 4.
+
+AUC of Random Forest is higher (0.864) than the AUC of Classification tree (0.816). Hence Random forest performs better than Classification tree. 
+
+```{R}
+
+rf_preds <- predict(rf_mod, newdata = test_set, type = 'prob')[,2]
+tree_preds <- predict(tree_mod, newdata = test_set)[,2]
+
+
+pred_rf <- prediction(predictions = rf_preds, labels = test_set$Survived_fct)
+pred_tree <- prediction(predictions = tree_preds, labels = test_set$Survived_fct)
+
+
+auc_rf <-performance(pred_rf, measure ='auc')
+auc_tree <-performance(pred_tree, measure ='auc')
+
+auc_rf@y.values[[1]]
+auc_tree@y.values[[1]]
+
+```
+
+#### 5.
+
+Note: Though bind_rows has option to add id I wanted to have the rf & tree as id so adding additional column to both the rf & tree perf tbl. 
+
+
+```{R}
+
+# get the FPR and TPR for the logistic model
+# recall that the ROC curve plots the FPR on the x-axis
+perf_rf <- performance(pred_rf, measure = 'tpr', x.measure = 'fpr')
+perf_rf_tbl <- tibble(perf_rf@x.values[[1]], perf_rf@y.values[[1]])
+
+# Change the names of the columns of the tibble
+names(perf_rf_tbl) <- c('fpr', 'tpr')
+
+# get the FPR and TPR for the tree model
+perf_tree <- performance(pred_tree, measure = 'tpr', x.measure = 'fpr')
+perf_tree_tbl <- tibble(perf_tree@x.values[[1]], perf_tree@y.values[[1]])
+
+# Change the names of the columns of the tibble
+names(perf_tree_tbl) <- c('fpr', 'tpr')
+
+perf_tree_tbl <- perf_tree_tbl %>% mutate(id = "tree")
+perf_rf_tbl <- perf_rf_tbl %>% mutate(id = "rf")
+
+
+bind_results <- bind_rows(perf_tree_tbl, perf_rf_tbl)
+
+# Plotting function for plotting a nice ROC curve using ggplot
+plot_roc <- function(perf_tbl) {
+  p <- ggplot(data = perf_tbl, aes(x = fpr, y = tpr, color = id)) +
+  geom_line() +
+  geom_abline(intercept = 0, slope = 1, lty = 3) +
+  labs(x = 'False positive rate', y = 'True positive rate') +
+  theme_bw()
+  return(p)
+}
+
+plot_roc(bind_results)
+
+
+```
+
+
+#### 6.
+
+a.  Based on the AUC & ROC curves both Random forest & Decision tree models are fitting well with data and Random forest is better than decision tree model. 
+
+b. According the ROC curves plotted above, fpr is approximately 0.22 & 0.27 for Random forest & Decision tree respectively if we attain tpr of 0.75. 
