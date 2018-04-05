@@ -1,0 +1,97 @@
+---
+title: "COMPSCIX 415.2 Homework 9/Final"
+author: "Gokila Rajaiah"
+date: "April 3, 2018"
+output: html_document
+---
+
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(modelr)
+
+
+```
+
+
+```{r}
+
+file_path <- './Input/train_final.csv'
+
+input_data <- read.csv(file_path)
+
+input_data <- input_data %>%
+  mutate(Survived_fct = factor(Survived, ordered = FALSE))
+
+glimpse(input_data)
+
+```
+
+```{R}
+
+
+titanic_boot <- bootstrap(data = input_data, n = 100)
+
+titanic_boot
+
+```
+
+```{r}
+# since the strap column of titanic_boot is a list, we can
+# extract the resampled data using the double brackets [[]],
+# and just pick out a few of them to compare the number of
+# distinct rows
+
+as.tibble(titanic_boot$strap[[1]]) %>% n_distinct()
+as.tibble(titanic_boot$strap[[2]]) %>% n_distinct()
+as.tibble(titanic_boot$strap[[3]]) %>% n_distinct()
+
+```
+
+```{r}
+
+age_mean <- function(boot_sample) {
+  data <- as.tibble(boot_sample) # convert input data set to a tibble
+  mean_age <- mean(data$Age, na.rm = TRUE) # take the mean of Age, remove NAs
+  return(mean_age) # return the mean value of Age from data
+}
+
+
+# loop through the 100 bootstrap samples and use the age_mean()
+# function
+all_means <- rep(NA, 100)
+
+# start the loop
+for(i in 1:100) {
+  all_means[i] <- age_mean(titanic_boot$strap[[i]])
+}
+
+# take a look at some of the means you calculated from your samples
+head(all_means)
+
+# convert to a tibble so we can use if for plotting
+all_means <- tibble(all_means = all_means)
+
+```
+
+```{R}
+
+ggplot(data=all_means) +
+  geom_histogram(aes(x= all_means))
+
+
+```
+#### 4. 
+
+Our empirical standard error calculated by using the sd of bootstrap means is closely matching with the Theoretical Standard error of the input sample. 
+
+```{R}
+
+all_means %>% summarize(se_mean = sd(all_means))
+
+input_data %>% summarize(se = sd(Age, na.rm = TRUE)/sqrt(891))
+
+
+```
