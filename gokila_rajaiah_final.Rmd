@@ -66,7 +66,7 @@ as.tibble(titanic_boot$strap[[3]]) %>% n_distinct()
 ```
 
 
-#### 4. 
+#### 4. Central limit theorem demonstration using Bootstrapping of Samples:
 
 ```{r}
 
@@ -92,26 +92,30 @@ head(all_means)
 # convert to a tibble so we can use if for plotting
 all_means <- tibble(all_means = all_means)
 
+
 ```
 
 #### 5.
 
-```{R}
+```{r, warning=FALSE, message=FALSE, fig.align='center', fig.height=7, fig.width=10}
 
 ggplot(data=all_means) +
-  geom_histogram(aes(x= all_means))
+  geom_histogram(aes(x= all_means)) 
 
 
 ```
-#### 6. 
 
-Our empirical standard error calculated by using the sd of bootstrap means is closely matching with the Theoretical Standard error of the input sample. 
+####  6. 
+
+Our empirical standard error calculated by using the standard deviation of bootstrap means is closely matching with the Theoretical Standard error of the input sample. 
 
 ```{R}
 
-all_means %>% summarize(se_mean = sd(all_means))
+empirical_se <- all_means %>% summarize(empirical_se = sd(all_means))
 
-input_data %>% summarize(se = sd(Age, na.rm = TRUE)/sqrt(891))
+theoritical_se <- input_data %>% summarize(theoritical_se = sd(Age, na.rm = TRUE)/sqrt(891))
+
+bind_cols(empirical_se, theoritical_se)
 
 
 ```
@@ -136,21 +140,22 @@ glimpse(test_set)
 
 #### 2.
 
-comparing the tree plot of the model with more features with that one of only three features (Sex, Pclass & Fare) we see the tree is bigger i.e. more number of nodes and levels. 
+comparing the tree plot of the model with more features with the three feature (Sex, Pclass & Fare) model, we see the tree is bigger i.e. more number of nodes and levels. 
 
-In both the tree plot we can see that first split occurs in the feature Sex which shows that this is a strong one. Also, Pclass split happens at value 2.5 which is same as the model with just 3 features. 
+In both the tree plot we can see that first split occurs in the feature Sex which shows that this is a strong one. Also, Pclass split happens at same value 2.5 in both models. 
 
 Fare feature splits at different values in both. 
 
-```{R}
+```{R, fig.align='center', fig.height=7, fig.width=10}
+
 tree_mod <- rpart(Survived_fct ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked, data = input_data)
 
 plot(as.party(tree_mod))
 
-
 ```
 
 #### 3.
+
 ```{R}
 
 
@@ -160,7 +165,7 @@ rf_mod <- randomForest(Survived_fct ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked,
                          mtry = 4, 
                          na.action = na.roughfix)
 
-rf_mod
+summary(rf_mod)
 
 ```
 
@@ -235,4 +240,4 @@ plot_roc(bind_results)
 
 a.  Based on the AUC & ROC curves both Random forest & Decision tree models are fitting well with data and Random forest is better than decision tree model. 
 
-b. According the ROC curves plotted above, fpr is approximately 0.22 & 0.27 for Random forest & Decision tree respectively if we attain tpr of 0.75. 
+b. According to the ROC curves plotted above, fpr is approximately 0.22 & 0.27 for Random forest & Decision tree respectively if we attain tpr of 0.75. 
